@@ -9,22 +9,25 @@
 SDL_Renderer* renderer;
 SDL_Window* window;
 
-// ADD ALL IN A ARRAY FUNCTION
-int addAll(char input[]) 
+// SUBSTR FUNCTION
+char* substring(char input[], int sta, int end) {
+	char result[] = "";
+	for(int i=sta;i<end;i++){
+		result[i]=input[i];
+	}
+	return result;
+}
+
+// FIND A NUM FUNCTION
+int findNum(char input[]) 
 {
-	int ult = 0;
-	for(int i=0;i<strlen(input);i++){
-		// quick fix
-		if(input[i]  !='-') {
-			int te = input[i];
-			ult = ult + te;
-		}
-		else{
-			i=i+1;
-			continue;
+	for(int i=0;i<strlen(input);i++)
+	{
+		if(input[i]=='9'){
+			return(i);
 		}
 	}
-	return ult;
+	return 0;
 }
 
 ///// DRAW SPRITE FUNCTION
@@ -46,17 +49,25 @@ void DrawSprite()
 	}
 
 	// Get each data piece
-	char listo[] = "";
+	char* listo;
+	int end = 0;
 	while(fgets(buffer, bufferLength, fptr))
 	{
 		char* data = buffer;
+
 		//Add to string
-		for(int i=0;i<strlen(data);i++)
+		/*for(int i=0;i<strlen(data);i++)
 		{
-		//printf("%d",data[i]);
-		listo[i] = data[i];
+		printf("%d",data[i]);
+		listo = data;
 		}
-		printf("%d", addAll(listo));
+		*/
+
+		//Get to split
+		int found = findNum(data);
+		//Substring
+		end = substring(data,0,found);
+		printf("%d", end);
 	}
 
 	fclose(fptr);
@@ -65,7 +76,7 @@ void DrawSprite()
 	// Set render color
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	// Draw a point
-	SDL_RenderDrawPoint(renderer, 50, 50);
+	SDL_RenderDrawPoint(renderer, end, 50);
 }
 
 
@@ -82,6 +93,7 @@ int main( int argc, char* args[] )
 	SDL_CreateWindowAndRenderer(350, 350, 0, &window, &renderer);
 
 	// MAIN Loop
+	DrawSprite();
 	while (true) {
 	// Get next event
 	SDL_Event event;
@@ -117,7 +129,6 @@ int main( int argc, char* args[] )
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		// Draw a point
 		SDL_RenderDrawPoint(renderer, xpos, ypos);
-		DrawSprite();
 		// Refresh the render/frame
 		SDL_RenderPresent(renderer);
 
