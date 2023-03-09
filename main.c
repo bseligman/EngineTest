@@ -10,7 +10,6 @@ SDL_Renderer* renderer;
 SDL_Window* window;
 
 
-
 // INT SUBSTR FUNCTION
 int substring(int input, int enter) 
 {
@@ -35,7 +34,7 @@ int findNum(char input[], int find)
 
 
 ///// DRAW SPRITE FUNCTION
-void DrawSprite(char* sprite, int x, int y)
+void DrawSprite(char* sprite, int x, int y, int scale)
 {
   
    FILE *file;
@@ -51,18 +50,25 @@ void DrawSprite(char* sprite, int x, int y)
         code[n++] = (char) c;
     }
 
-    // don't forget to terminate with the null character
+    // terminator w/ null char
     code[n] = '\0';        
 	
    fclose(file);
 
    //Go through and stuff
    int ogx = x;
-   for(int i =0; i<30;i++){
-   	printf("%c", code[i]);
+   //for how many inputted pixels for sprite, set i
+   for(int i =0; i<128;i++){
+   	// for scale
+   	for(int b=0;b<scale;b++){
+   
    	if(code[i]=='1'){
-   	   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-   	   SDL_RenderDrawPoint(renderer, x, y);
+   		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+   		SDL_RenderDrawPoint(renderer, x, y);
+   		// y fix
+   		for(int c=0;c<scale;c++){
+   			SDL_RenderDrawPoint(renderer, x, y+c);
+   		}
    	}
    	else if(code[i] == '0'){
    	   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -73,6 +79,7 @@ void DrawSprite(char* sprite, int x, int y)
    		x=ogx;
    	}
    	x=x+1;
+   	 }
    }
  
 }
@@ -90,7 +97,10 @@ int main( int argc, char* args[] )
 	int ypos = 200;
 
 	//Create window
-	SDL_CreateWindowAndRenderer(350, 350, 0, &window, &renderer);
+	//base=128 scaled=512, 5*
+	SDL_CreateWindowAndRenderer(512, 512, 0, &window, &renderer);
+
+
 
 	// MAIN Loop
 	while (true) {
@@ -104,7 +114,7 @@ int main( int argc, char* args[] )
 	char ch = getch();
 
 	// loop to draw
-	DrawSprite("chartest.txt",100,100);
+	DrawSprite("chartest.txt",100,100,15);
 
 
 	// UP
@@ -131,7 +141,7 @@ int main( int argc, char* args[] )
 	    // Set render color
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		// Draw a point
-		DrawSprite("chartest.txt",xpos,ypos);
+		DrawSprite("chartest.txt",xpos,ypos,15);
 		// Refresh the render/frame
 		SDL_RenderPresent(renderer);
 
