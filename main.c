@@ -9,75 +9,75 @@
 SDL_Renderer* renderer;
 SDL_Window* window;
 
-// SUBSTR FUNCTION
-char* substring(char input[], int sta, int end) {
-	char result[] = "";
-	for(int i=sta;i<end;i++){
-		result[i]=input[i];
-	}
-	return result;
+
+
+// INT SUBSTR FUNCTION
+int substring(int input, int enter) 
+{
+	return input;
 }
 
+
+/*
 // FIND A NUM FUNCTION
-int findNum(char input[]) 
+int findNum(char input[], int find) 
 {
 	for(int i=0;i<strlen(input);i++)
 	{
-		if(input[i]=='9'){
+		if(input[i]==find)
+		{
 			return(i);
 		}
 	}
-	return 0;
+	return 5;
 }
+*/
+
 
 ///// DRAW SPRITE FUNCTION
-void DrawSprite()
+void DrawSprite(char* sprite, int x, int y)
 {
-	// File Set
-	FILE* fptr;
-	char* data;
-	// Set BuffLength and Buffer vars
-	int bufferLength = 255;
-	char buffer[bufferLength];
+  
+   FILE *file;
+   char *code;
+   size_t n = 0;
+   int c;
 
-	// Open File
-	fptr = fopen("chartest.txt", "r");
-	// Error handler
-	if (fptr == NULL) {
-		perror("Failed: ");
-		return;
-	}
+   file = fopen(sprite, "r");
 
-	// Get each data piece
-	char* listo;
-	int end = 0;
-	while(fgets(buffer, bufferLength, fptr))
-	{
-		char* data = buffer;
+    code = malloc(1000);
+    while ((c = fgetc(file)) != EOF)
+    {
+        code[n++] = (char) c;
+    }
 
-		//Add to string
-		/*for(int i=0;i<strlen(data);i++)
-		{
-		printf("%d",data[i]);
-		listo = data;
-		}
-		*/
+    // don't forget to terminate with the null character
+    code[n] = '\0';        
+	
+   fclose(file);
 
-		//Get to split
-		int found = findNum(data);
-		//Substring
-		end = substring(data,0,found);
-		printf("%d", end);
-	}
-
-	fclose(fptr);
-
-
-	// Set render color
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	// Draw a point
-	SDL_RenderDrawPoint(renderer, end, 50);
+   //Go through and stuff
+   int ogx = x;
+   for(int i =0; i<30;i++){
+   	printf("%c", code[i]);
+   	if(code[i]=='1'){
+   	   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+   	   SDL_RenderDrawPoint(renderer, x, y);
+   	}
+   	else if(code[i] == '0'){
+   	   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+   	   SDL_RenderDrawPoint(renderer, x, y);
+   	}
+   	else{
+   		y=y+1;
+   		x=ogx;
+   	}
+   	x=x+1;
+   }
+ 
 }
+
+
 
 
 
@@ -93,17 +93,20 @@ int main( int argc, char* args[] )
 	SDL_CreateWindowAndRenderer(350, 350, 0, &window, &renderer);
 
 	// MAIN Loop
-	DrawSprite();
 	while (true) {
 	// Get next event
 	SDL_Event event;
 
 	///// KEYBORAD input
-	// Init ncurse
+	// Init ncurse/keyb input
 	initscr();
 	cbreak();
 	char ch = getch();
-	printf("%d", ch);
+
+	// loop to draw
+	DrawSprite("chartest.txt",100,100);
+
+
 	// UP
 	if(ch == 119)
 		{
@@ -128,7 +131,7 @@ int main( int argc, char* args[] )
 	    // Set render color
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		// Draw a point
-		SDL_RenderDrawPoint(renderer, xpos, ypos);
+		DrawSprite("chartest.txt",xpos,ypos);
 		// Refresh the render/frame
 		SDL_RenderPresent(renderer);
 
