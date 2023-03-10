@@ -79,6 +79,15 @@ void DrawSprite(char* sprite, int x, int y, int scale)
    			SDL_RenderDrawPoint(renderer, x, y+c);
    		}
    	}
+
+   	else if(code[i]=='2'){
+   		SDL_SetRenderDrawColor(renderer, 128, 128, 128, 128);
+   		SDL_RenderDrawPoint(renderer, x, y);
+   		// y fix
+   		for(int c=0;c<scale;c++){
+   			SDL_RenderDrawPoint(renderer, x, y+c);
+   		}
+   	}
    	else if(code[i] == '0'){
    	   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
    	   SDL_RenderDrawPoint(renderer, x, y);
@@ -94,7 +103,7 @@ void DrawSprite(char* sprite, int x, int y, int scale)
 }
 
 // Get X cords
-int getXCords(char* sprite)
+int getXCords(char* sprite, char findme, int limit)
 {
    FILE *file;
    char *code;
@@ -113,8 +122,8 @@ int getXCords(char* sprite)
    //Go through and stuff
    int ogx = x;
    //for how many inputted pixels for sprite, set i
-   for(int i =0; i<128;i++){
-   	if(code[i] == '3'){
+   for(int i =limit; i<256;i++){
+   	if(code[i] == findme){
    		return(x);
    }
    	else{
@@ -126,7 +135,7 @@ int getXCords(char* sprite)
    }
 
 // Get Y cords
-int getYCords(char* sprite)
+int getYCords(char* sprite, char findme, int limit)
 {
    FILE *file;
    char *code;
@@ -145,8 +154,8 @@ int getYCords(char* sprite)
    //Go through and stuff
    int ogx = x;
    //for how many inputted pixels for sprite, set i
-   for(int i =0; i<128;i++){
-   	if(code[i] == '3'){
+   for(int i =limit; i<256;i++){
+   	if(code[i] == findme){
    		return(y);
    }
    	else{
@@ -156,8 +165,6 @@ int getYCords(char* sprite)
    	x=x+1;
    	}
    }
-
-
 
 
 ///// LOAD ROOM FUNCTION
@@ -187,7 +194,7 @@ void LoadRoom(char* sprite, int scale)
    int playerx = 0;
    int playery = 0;
    //for how many inputted pixels for sprite, set i
-   for(int i =0; i<512;i++){
+   for(int i =0; i<1028;i++){
    	// for scale
    	for(int b=0;b<scale;b++){
    
@@ -224,8 +231,8 @@ int main( int argc, char* args[] )
 {
 	//// PLAYER VARS
 	char* activer = "room1.txt";
-	int xpos = getXCords(activer);
-	int ypos = getYCords(activer);
+	int xpos = getXCords(activer, '3', 0);
+	int ypos = getYCords(activer, '3', 0);
 
 
 	//Create window
@@ -248,31 +255,55 @@ int main( int argc, char* args[] )
 	//Draw Background
 	fillscreen(0,0,0);
 	//Load Room
-	LoadRoom(activer,12);
+	LoadRoom(activer,15);
    //Draw Player
-	DrawSprite("chartest.txt",xpos,ypos,2);
+	DrawSprite("chartest.txt",xpos,ypos,4);
 
-	// UP
-	if(ch == 119)
+
+	// COLLISION UP
+	if(ypos-5 > getYCords(activer, '0', ypos-5))
+	{
+		// UP
+		if(ch == 119)
 		{
 			ypos=ypos-10;
 		}
-	// DOWN
-	if(ch == 115)
+	}
+	// COLLISION DOWN
+	if(ypos+5 > getYCords(activer, '0', ypos+5))
+	{
+		// DOWN
+		if(ch == 115)
 		{
 			ypos=ypos+10;
 		}
-	// LEFT
-	if(ch == 97)
-	{
-		xpos=xpos-10;
 	}
-	// RIGHT
-	if(ch == 100)
+
+	// COLLISION LEFT
+	if(xpos-5 > getXCords(activer, '0', xpos-5))
 	{
+		// LEFT
+		if(ch == 97)
+		{
+			xpos=xpos-10;
+		}
+	}
+	else{
 		xpos=xpos+10;
 	}
 
+	// COLLISION RIGHT)
+	if(xpos+5 > getXCords(activer, '0', xpos+5))
+	{
+		// RIGHT
+		if(ch == 100)
+		{
+			xpos=xpos+10;
+		}
+	}
+	else{
+	xpos=xpos-10;
+	}
 	// Refresh the render/frame
 	SDL_RenderPresent(renderer);
 
