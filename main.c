@@ -67,7 +67,7 @@ void DrawSprite(char* sprite, int x, int y, int scale)
    //Go through and stuff
    int ogx = x;
    //for how many inputted pixels for sprite, set i
-   for(int i =0; i<128;i++){
+   for(int i =0; i<32;i++){
    	// for scale
    	for(int b=0;b<scale;b++){
    
@@ -102,13 +102,16 @@ void DrawSprite(char* sprite, int x, int y, int scale)
  
 }
 
-// Get X cords
-int getXCords(char* sprite, char findme, int limit)
+// Get Cords
+int getCords(char* sprite, int scale, int inx, int iny)
 {
    FILE *file;
    char *code;
    size_t n = 0;
    int c, x=0,y=0;
+
+   int matrix[100][100];
+
    file = fopen(sprite, "r");
     code = malloc(1000);
     while ((c = fgetc(file)) != EOF)
@@ -122,50 +125,24 @@ int getXCords(char* sprite, char findme, int limit)
    //Go through and stuff
    int ogx = x;
    //for how many inputted pixels for sprite, set i
-   for(int i =limit; i<256;i++){
-   	if(code[i] == findme){
-   		return(x);
-   }
+   for(int i =0; i<512;i++){
+   	if(code[i] == '1'){
+   		matrix[x][y] == 1;
+   	}
+   	else if(code[i] == '0'){
+   		matrix[x][y] == 0;
+   	}
+   	else if(code[i] == '3'){
+   		matrix[x][y] == 3;
+   	}
    	else{
    		y=y+1;
    		x=ogx;
    	}
    	x=x+1;
    	}
-   }
-
-// Get Y cords
-int getYCords(char* sprite, char findme, int limit)
-{
-   FILE *file;
-   char *code;
-   size_t n = 0;
-   int c, x=0,y=0;
-   file = fopen(sprite, "r");
-    code = malloc(1000);
-    while ((c = fgetc(file)) != EOF)
-    {
-      code[n++] = (char) c;
-    }
-
-    // terminator w/ null char
-    code[n] = '\0';        
-   fclose(file);
-   //Go through and stuff
-   int ogx = x;
-   //for how many inputted pixels for sprite, set i
-   for(int i =limit; i<256;i++){
-   	if(code[i] == findme){
-   		return(y);
-   }
-   	else{
-   		y=y+1;
-   		x=ogx;
-   	}
-   	x=x+1;
-   	}
-   }
-
+   return(matrix[inx][iny]);
+}
 
 ///// LOAD ROOM FUNCTION
 void LoadRoom(char* sprite, int scale)
@@ -194,7 +171,7 @@ void LoadRoom(char* sprite, int scale)
    int playerx = 0;
    int playery = 0;
    //for how many inputted pixels for sprite, set i
-   for(int i =0; i<1028;i++){
+   for(int i =0; i<512;i++){
    	// for scale
    	for(int b=0;b<scale;b++){
    
@@ -231,10 +208,10 @@ int main( int argc, char* args[] )
 {
 	//// PLAYER VARS
 	char* activer = "room1.txt";
-	int xpos = getXCords(activer, '3', 0);
-	int ypos = getYCords(activer, '3', 0);
-
-
+	//int xpos = getXCords(activer, '3', 0,1);
+	//int ypos = getYCords(activer, '3', 0,1);
+	int xpos = 20;
+	int ypos= 20;
 	//Create window
 	//base=128 scaled=512, 5*
 	SDL_CreateWindowAndRenderer(512, 512, 0, &window, &renderer);
@@ -254,56 +231,49 @@ int main( int argc, char* args[] )
 
 	//Draw Background
 	fillscreen(0,0,0);
-	//Load Room
-	LoadRoom(activer,15);
+
+	// LOAD ROOM
+	// Room Load
+	LoadRoom(activer,5);
+
    //Draw Player
-	DrawSprite("chartest.txt",xpos,ypos,4);
+	DrawSprite("chartest.txt",xpos,ypos,1);
 
+	// COLLISION SCALE
+	int cscale=5;
 
-	// COLLISION UP
-	if(ypos-5 > getYCords(activer, '0', ypos-5))
+	if(ch == 119)
 	{
-		// UP
-		if(ch == 119)
-		{
-			ypos=ypos-10;
-		}
+			if(getCords(activer,cscale,xpos,ypos-5) == 0) {
+			ypos=ypos-5;
+			}
 	}
-	// COLLISION DOWN
-	if(ypos+5 > getYCords(activer, '0', ypos+5))
-	{
+
 		// DOWN
-		if(ch == 115)
-		{
-			ypos=ypos+10;
+	if(ch == 115)
+	{
+		if(getCords(activer,cscale,xpos,ypos+5) == 0) {
+			ypos=ypos+5;
 		}
 	}
 
-	// COLLISION LEFT
-	if(xpos-5 > getXCords(activer, '0', xpos-5))
+	//LEFT
+	if(ch == 97)
 	{
-		// LEFT
-		if(ch == 97)
-		{
-			xpos=xpos-10;
-		}
-	}
-	else{
-		xpos=xpos+10;
+			if(getCords(activer,cscale,xpos+5,ypos) == 0) {
+				xpos=xpos-5;
+			}
 	}
 
-	// COLLISION RIGHT)
-	if(xpos+5 > getXCords(activer, '0', xpos+5))
+	//RIGHT
+	if(ch == 100)
 	{
-		// RIGHT
-		if(ch == 100)
-		{
-			xpos=xpos+10;
-		}
+			// Check boundry
+			if(getCords(activer,cscale,xpos-5,ypos) == 0) {
+				xpos=xpos+5;
+			}	
 	}
-	else{
-	xpos=xpos-10;
-	}
+
 	// Refresh the render/frame
 	SDL_RenderPresent(renderer);
 
