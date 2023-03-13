@@ -50,7 +50,7 @@ void DrawSprite(char* sprite, int x, int y, int scale)
    //Go through and stuff
    int ogx = x;
    //for how many inputted pixels for sprite, set i
-   for(int i =0; i<32;i++){
+   for(int i =0; i<128;i++){
    	// for scale
    	for(int b=0;b<scale;b++){
    
@@ -135,6 +135,12 @@ void LoadRoom(char* sprite, int scale)
    			SDL_RenderDrawPoint(renderer, x, y+c);
    		}   	
    	}
+    	if(code[i] == '4'){
+   	   SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+   		for(int c=0;c<scale;c++){
+   			SDL_RenderDrawPoint(renderer, x, y+c);
+   		}   	
+   	}
    	else if(code[i] == '\n'){
    		y=y+1;
    		x=ogx;
@@ -167,7 +173,7 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
 	
    fclose(file);
 
-   //test
+   //arrays need to be very big to hold room data jesus christ
    int anaray[441][441];
 
    //Go through and stuff
@@ -178,7 +184,7 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
    for(int i =0; i<256;i++){
    	// for scale
    	for(int b=0;b<scale;b++){
-   
+   	// Filled Tile
    	if(code[i]=='1'){
    		anaray[x][y]=1;
    		// y fix
@@ -186,14 +192,22 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
    			anaray[x][y+c]=1;
    		}
    	}
+   	// Air Tile
    	else if(code[i] == '0'){
    		for(int c=0;c<scale;c++){
    			anaray[x][y+c]=0;
    		}   	
    	}
+   	// Spawn Tile
    	else if(code[i] == '3'){
    		for(int c=0;c<scale;c++) {
    			anaray[x][y+c]=3;
+   		} 
+   	}
+   	// Load R Tile
+   	else if(code[i] == '4'){
+   		for(int c=0;c<scale;c++) {
+   			anaray[x][y+c]=4;
    		} 
    	}
    	else{
@@ -207,22 +221,23 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
 }
 
 
+
+
+
 // Main Starting Function
 int main( int argc, char* args[] )
 {
 	//// PLAYER VARS
 	char* activer = "room1.txt";
-	//int xpos = getXCords(activer, '3', 0,1);
-	//int ypos = getYCords(activer, '3', 0,1);
 	int xpos = 10;
-	int ypos= 10;
-	//Create window
-	//base=128 scaled=512, 5*
+	int ypos = 10;
+	//Create window, base=128 (scaled*5)
 	SDL_CreateWindowAndRenderer(512, 512, 0, &window, &renderer);
 
+	// ROOM STATUS VARS
+	int loadroom1 = 0;
 
-
-	// MAIN Loop
+	//// OVERWORLD LOOP
 	while (true) {
 	// Get next event
 	SDL_Event event;
@@ -239,20 +254,47 @@ int main( int argc, char* args[] )
 	// COLLISION SCALE
 	int cscale=10;
 
-	// LOAD ROOM
+	///// LOAD ROOM MANAGER
 	// Room Load
 	LoadRoom(activer,cscale);
+	if (loadroom1 == 1) {
+		activer = "room2.txt";
+		loadroom1=0;
+	}
+
+	// Check Loading Status
+	// R LOAD
+	if(getCords(activer,cscale,xpos+1,ypos) == 4) {
+		loadroom1 = 1;
+		xpos= 10;
+		ypos= 10;
+	}
 
    //Draw Player
 	DrawSprite("chartest.txt",xpos,ypos,1);
 
-	// theory: up and down no work casue of map not being even (ex. has to be 11x11)
+	//// DEBUG MODE
+	// PLAYER POSITION
+	// XY NEXT+1
+	if (getCords(activer,cscale,xpos+3,ypos)==0) {
+		DrawSprite("0.txt",20,200,4);
+	}
+	if (getCords(activer,cscale,xpos+3,ypos)==1) {
+		DrawSprite("1.txt",20,200,4);
+	}
+	if (getCords(activer,cscale,xpos+3,ypos)==2) {
+		DrawSprite("2.txt",20,200,4);
+	}
+	if (getCords(activer,cscale,xpos+3,ypos)==4) {
+		DrawSprite("4.txt",20,200,4);
+	}
+
 	//UP
 	if(ch == 119)
 	{
 		if(getCords(activer,cscale,xpos,ypos-3) == 0) {
 			ypos=ypos-3;
-			}
+		}
 	}
 
 	// DOWN
@@ -262,34 +304,23 @@ int main( int argc, char* args[] )
 			ypos=ypos+3;
 		}
 	}
-
-
-
  
 	//LEFT
 	if(ch == 97)
 	{
-			if(getCords(activer,cscale,xpos-3,ypos) == 0) {
-				xpos=xpos-3;
-			}
+		if(getCords(activer,cscale,xpos-3,ypos) == 0) {
+			xpos=xpos-3;
+		}
 	}
 
 	//RIGHT
 	if(ch == 100)
 	{
-			// Check boundry
-			if(getCords(activer,cscale,xpos+3,ypos) == 0) {
-				xpos=xpos+3;
-			}	
-	}
-
-	//DEBUG RESET (79 = O)  
-	if(ch == 79) {
-		xpos= 20;
-		ypos=20;
-	}
-	
-	//
+		// Check boundry collision
+		if(getCords(activer,cscale,xpos+3,ypos) == 0) {
+			xpos=xpos+3;
+		}	
+	}	
 
 	// Refresh the render/frame
 	SDL_RenderPresent(renderer);
