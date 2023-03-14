@@ -33,7 +33,8 @@ void DrawSprite(char* sprite, int x, int y, int scale)
    char *code;
    size_t n = 0;
    int c;
-
+   //Go through and stuff
+   int ogx = x;
    file = fopen(sprite, "r");
 
     code = malloc(2000);
@@ -47,10 +48,8 @@ void DrawSprite(char* sprite, int x, int y, int scale)
 	
    fclose(file);
 
-   //Go through and stuff
-   int ogx = x;
    //for how many inputted pixels for sprite, set i
-   for(int i =0; i<128;i++){
+   for(int i =0; i<64;i++){
    	// for scale
    	for(int b=0;b<scale;b++){
    
@@ -74,13 +73,16 @@ void DrawSprite(char* sprite, int x, int y, int scale)
    	else if(code[i] == '0'){
    	   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
    	   SDL_RenderDrawPoint(renderer, x, y);
+   	   for(int c=0;c<scale;c++){
+   			SDL_RenderDrawPoint(renderer, x, y+c);
+   		}
    	}
-   	else{
+   	else if(code[i]=='\n'){
    		y=y+1;
    		x=ogx;
    	}
    	x=x+1;
-   	 }
+   	}
    }
  }
 
@@ -181,7 +183,7 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
    int playerx = 0;
    int playery = 0;
    //for how many inputted pixels for sprite, set i
-   for(int i =0; i<256;i++){
+   for(int i =0; i<512;i++){
    	// for scale
    	for(int b=0;b<scale;b++){
    	// Filled Tile
@@ -194,18 +196,21 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
    	}
    	// Air Tile
    	else if(code[i] == '0'){
+     		anaray[x][y]=0;
    		for(int c=0;c<scale;c++){
    			anaray[x][y+c]=0;
    		}   	
    	}
    	// Spawn Tile
    	else if(code[i] == '3'){
+     		anaray[x][y]=3;
    		for(int c=0;c<scale;c++) {
    			anaray[x][y+c]=3;
    		} 
    	}
    	// Load R Tile
    	else if(code[i] == '4'){
+      		anaray[x][y]=4;
    		for(int c=0;c<scale;c++) {
    			anaray[x][y+c]=4;
    		} 
@@ -217,6 +222,7 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
    	x=x+1;
    	}
 	}
+	printf("%d\n", anaray[inpx][inpy]);
    return(anaray[inpx][inpy]);
 }
 
@@ -233,17 +239,13 @@ int main( int argc, char* args[] )
 
 	//// PLAYER VARS
 	char* activer = "room1.txt";
-	int xpos = 20;
-	int ypos = 20;
+	int xpos = 0;
+	int ypos = 0;
 	//Create window, base=128 (scaled*5)
 	SDL_CreateWindowAndRenderer(512, 512, 0, &window, &renderer);
 
 	// ROOM STATUS VARS 
 	int loadroom1 = 0;
-
-	// CAMERA VARS
-	int camxpos = 256;
-	int camypos= 256;
 
 
 	////////////////////////////////// OVERWORLD LOOP
@@ -282,10 +284,11 @@ int main( int argc, char* args[] )
 	//// DEBUG MODE
 	// PLAYER POSITION
 	// XY NEXT+1
-	if (getCords(activer,cscale,camxpos+3,camypos)==0) {
+	/*
+	if (getCords(activer,cscale,256-xpos,ypos)==0) {
 		DrawSprite("0.txt",20,200,4);
 	}
-	if (getCords(activer,cscale,camxpos+3,camypos)==1) {
+	if (getCords(activer,cscale,256-xpos,ypos)==1) {
 		DrawSprite("1.txt",20,200,4);
 	}
 	if (getCords(activer,cscale,camxpos+3,camypos)==2) {
@@ -294,32 +297,31 @@ int main( int argc, char* args[] )
 	if (getCords(activer,cscale,camxpos+3,camypos)==4) {
 		DrawSprite("4.txt",20,200,4);
 	}
-
+	*/
 
 	// DOWN
 	if(ch == 119)
 	{
-		if(getCords(activer,cscale,camxpos,camypos+3) == 0) {
+		if(getCords(activer,cscale,256-xpos/cscale,272-ypos/cscale) == 0) {
 			ypos=ypos+cscale/2;
-			camypos=ypos+cscale/2;
 		}
 	}
 
 	// UP
 	if(ch == 115)
 	{
-		if(getCords(activer,cscale,camxpos,camypos-3) == 0) {
+		if(getCords(activer,cscale, 256-xpos/cscale,240-ypos/cscale) == 0) {
 			ypos=ypos-cscale/2;
-			camypos=ypos-cscale/2;
+
 		}
 	}
  
 	// RIGHT
 	if(ch == 97)
 	{
-		if(getCords(activer,cscale,camxpos+3,camypos) == 0) {
+		if(getCords(activer,cscale,272-xpos/cscale,256-ypos/cscale) == 0) {
 			xpos=xpos+cscale/2;
-			camxpos=xpos+cscale/2;
+
 		}
 	}
 
@@ -327,15 +329,15 @@ int main( int argc, char* args[] )
 	if(ch == 100)
 	{
 		// Check boundry collision
-		if(getCords(activer,cscale,camxpos-3,camypos) == 0) {
+		if(getCords(activer,cscale,240-xpos/cscale,256-ypos/cscale) == 0) {
 			xpos=xpos-cscale/2;
-			camxpos=xpos-cscale/2;
 		}	
 	}	
 
-//BEN NOTE: OFFSET OF Y IS WRONG AND X, BUT IS ALMOST THERE!
-	// THE OFFSET!
-	
+	//Debug Test
+	DrawSprite("chartest.txt", 256-xpos/cscale,240-ypos/cscale, 4);
+	DrawSprite("chartest.txt", 256-xpos/cscale,256-ypos/cscale, 4);
+
 	// Refresh the render/frame
 	SDL_RenderPresent(renderer);
 
