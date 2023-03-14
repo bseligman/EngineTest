@@ -97,7 +97,7 @@ void LoadRoom(char* sprite, int scale, int np_x, int np_y)
 
    // Open Map Visual Data
    file = fopen(sprite, "r");
-    code = malloc(10000);
+    code = malloc(12000);
     while ((c = fgetc(file)) != EOF)
     {
         code[n++] = (char) c;
@@ -164,7 +164,7 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
 
    // Open Map Visual Data
    file = fopen(sprite, "r");
-    code = malloc(10000);
+    code = malloc(16000);
     while ((c = fgetc(file)) != EOF)
     {
         code[n++] = (char) c;
@@ -176,55 +176,50 @@ int getCords(char* sprite, int scale, int inpx, int inpy)
    fclose(file);
 
    //arrays need to be very big to hold room data jesus christ
-   int anaray[871][871];
+   int anaray[1024][1024];
 
    //Go through and stuff
-   int ogx = x;
-   int playerx = 0;
-   int playery = 0;
+   int ogx = inpx;
    //for how many inputted pixels for sprite, set i
    for(int i =0; i<512;i++){
    	// for scale
    	for(int b=0;b<scale;b++){
-   	// Filled Tile
+   
    	if(code[i]=='1'){
-   		anaray[x][y]=1;
+
    		// y fix
+   		anaray[x][y]=1;
    		for(int c=0;c<scale;c++){
    			anaray[x][y+c]=1;
    		}
    	}
-   	// Air Tile
-   	else if(code[i] == '0'){
-     		anaray[x][y]=0;
+   	if(code[i] == '0'){
+    		anaray[x][y] = 0;
    		for(int c=0;c<scale;c++){
-   			anaray[x][y+c]=0;
+     			anaray[x][y+c] = 0;
    		}   	
    	}
-   	// Spawn Tile
-   	else if(code[i] == '3'){
-     		anaray[x][y]=3;
-   		for(int c=0;c<scale;c++) {
-   			anaray[x][y+c]=3;
-   		} 
+   	if(code[i] == '3'){
+    		anaray[x][y] = 3;
+   		for(int c=0;c<scale;c++){
+     			anaray[x][y+c] = 3;
+   		}   	
    	}
-   	// Load R Tile
-   	else if(code[i] == '4'){
-      		anaray[x][y]=4;
-   		for(int c=0;c<scale;c++) {
-   			anaray[x][y+c]=4;
-   		} 
+    	if(code[i] == '4'){
+    		anaray[x][y] = 4;
+   		for(int c=0;c<scale;c++){
+   			anaray[x][y+c] = 4;
+   		}   	
    	}
-   	else{
+   	else if(code[i] == '\n'){
    		y=y+1;
-   		x=0;
+   		x=ogx;
    	}
    	x=x+1;
    	}
-	}
-	printf("%d\n", anaray[inpx][inpy]);
+   }
    return(anaray[inpx][inpy]);
-}
+ }
 
 
 
@@ -235,12 +230,14 @@ int main( int argc, char* args[] )
 {
 
 	// COLLISION / WORLD SCALE
-	int cscale=22;
+	int cscale=18;
 
 	//// PLAYER VARS
 	char* activer = "room1.txt";
 	int xpos = 0;
 	int ypos = 0;
+
+	int center = 256;
 	//Create window, base=128 (scaled*5)
 	SDL_CreateWindowAndRenderer(512, 512, 0, &window, &renderer);
 
@@ -300,26 +297,25 @@ int main( int argc, char* args[] )
 	*/
 
 	// DOWN
-	if(ch == 119)
+	if(ch == 115)
 	{
-		if(getCords(activer,cscale,256-xpos/cscale,272-ypos/cscale) == 0) {
+		if(getCords(activer,cscale,center,(center-ypos)+center) == 0) {
 			ypos=ypos+cscale/2;
 		}
 	}
 
 	// UP
-	if(ch == 115)
+	if(ch == 119)
 	{
-		if(getCords(activer,cscale, 256-xpos/cscale,240-ypos/cscale) == 0) {
+		if(getCords(activer,cscale,center,(center-ypos)-center) == 0) {
 			ypos=ypos-cscale/2;
-
 		}
 	}
  
 	// RIGHT
 	if(ch == 97)
 	{
-		if(getCords(activer,cscale,272-xpos/cscale,256-ypos/cscale) == 0) {
+		if(getCords(activer,cscale,center+10,center) == 0) {
 			xpos=xpos+cscale/2;
 
 		}
@@ -328,15 +324,22 @@ int main( int argc, char* args[] )
 	// LEFT
 	if(ch == 100)
 	{
-		// Check boundry collision
-		if(getCords(activer,cscale,240-xpos/cscale,256-ypos/cscale) == 0) {
+		if(getCords(activer,cscale, center-10, center) == 0) {
 			xpos=xpos-cscale/2;
-		}	
+
+		}
 	}	
 
 	//Debug Test
-	DrawSprite("chartest.txt", 256-xpos/cscale,240-ypos/cscale, 4);
-	DrawSprite("chartest.txt", 256-xpos/cscale,256-ypos/cscale, 4);
+
+	//UP
+	DrawSprite("chartest.txt",center,center+10,4);
+	//DOWN
+	DrawSprite("chartest.txt",center,center-10,4);
+	//LEFT
+	DrawSprite("chartest.txt",center-10,center,4);
+	//RIGHT
+	DrawSprite("chartest.txt",center+10,center-10,4);
 
 	// Refresh the render/frame
 	SDL_RenderPresent(renderer);
