@@ -230,7 +230,7 @@ int main( int argc, char* args[] )
 {
 
 	// COLLISION / WORLD SCALE
-	int cscale=18;
+	int cscale=20;
 
 	//// PLAYER VARS
 	char* activer = "room1.txt";
@@ -299,33 +299,34 @@ int main( int argc, char* args[] )
 	// DOWN
 	if(ch == 115)
 	{
-		if(getCords(activer,cscale,center,(center-ypos)+center) == 0) {
-			ypos=ypos+cscale/2;
+		// equ: (center - ypos - (wanteed difference) + center
+		if(getCords(activer,cscale,center,(center-ypos)+center+20) == 0) {
+			ypos=ypos+5;
 		}
 	}
 
 	// UP
 	if(ch == 119)
 	{
-		if(getCords(activer,cscale,center,(center-ypos)-center) == 0) {
-			ypos=ypos-cscale/2;
+		if(getCords(activer,cscale,center,((center-ypos)-center-20) *-1) == 0) {
+			ypos=ypos-5;
 		}
 	}
  
 	// RIGHT
-	if(ch == 97)
+	if(ch == 100)
 	{
-		if(getCords(activer,cscale,center+10,center) == 0) {
-			xpos=xpos+cscale/2;
+		if(getCords(activer,cscale,(center-xpos)+20,center) == 0) {
+			xpos=xpos-5;
 
 		}
 	}
 
 	// LEFT
-	if(ch == 100)
+	if(ch == 97)
 	{
-		if(getCords(activer,cscale, center-10, center) == 0) {
-			xpos=xpos-cscale/2;
+		if(getCords(activer,cscale,center-xpos+20,center) == 0) {
+			xpos=xpos+5;
 
 		}
 	}	
@@ -333,13 +334,13 @@ int main( int argc, char* args[] )
 	//Debug Test
 
 	//UP
-	DrawSprite("chartest.txt",center,center+10,4);
+	DrawSprite("chartest.txt",center-xpos,center,4);
 	//DOWN
-	DrawSprite("chartest.txt",center,center-10,4);
+	DrawSprite("chartest.txt",center+xpos,center,4);
 	//LEFT
-	DrawSprite("chartest.txt",center-10,center,4);
+	DrawSprite("chartest.txt",center,center+5,4);
 	//RIGHT
-	DrawSprite("chartest.txt",center+10,center-10,4);
+	DrawSprite("chartest.txt",center,center-5,4);
 
 	// Refresh the render/frame
 	SDL_RenderPresent(renderer);
